@@ -17,10 +17,25 @@ jobs:
     - name: Start Juice Shop in Docker
       run: docker run -d -p 3000:3000 --name juice-shop bkimminich/juice-shop
 
-    - name: Wait for Juice Shop to Start
-      run: sleep 15
+    - name: Wait for Juice Shop to be ready
+      run: |
+        echo "Waiting for Juice Shop..."
+        for i in {1..20}; do
+          if curl -s http://localhost:3000 > /dev/null; then
+            echo "Juice Shop is up!"
+            break
+          fi
+          echo "Still waiting ($i)..."
+          sleep 5
+        done
 
-    - name: Install Python (for Semgrep)
+    - name: Check Docker status
+      run: docker ps -a
+
+    - name: Juice Shop logs
+      run: docker logs juice-shop
+
+    - name: Install Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
@@ -28,14 +43,19 @@ jobs:
     - name: Install Semgrep
       run: pip install semgrep
 
-    - name: Run Semgrep Scan (SAST)
-      run: |
-        semgrep scan --config auto || true
+    - name: Run Semgrep
+      run: semgrep scan --config auto || true
 
-    - name: Run OWASP ZAP Baseline Scan (DAST)
+    - name: Run OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.10.0
       with:
-      target: 'http://localhost:3000'
-      fail_action: false      
-      cmd_options: '-r report_html.html'
-    token: ${{ secrets.GITHUB_TOKEN }}
+        target: 'http://localhost:3000'
+        fail_action: false
+        cmd_options: '-r report_html.html'
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload ZAP Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: zap-html-report
+        path: report_html.html
