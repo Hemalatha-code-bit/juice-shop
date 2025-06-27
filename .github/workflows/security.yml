@@ -54,10 +54,12 @@ jobs:
         allow_issue_writing: false
         cmd_options: '-r report_html.html'
         token: ${{ secrets.GITHUB_TOKEN }}
+        
+     cmd_options: '-r report_html.html -J report_json.json -w report_md.md'
 
-    - name: Upload ZAP HTML Report
-      uses: actions/upload-artifact@v4
-      with:
+     - name: Upload ZAP HTML Report
+       uses: actions/upload-artifact@v4
+       with:
         name: zap-scan-report
         path: report_html.html
 
