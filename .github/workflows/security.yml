@@ -2,15 +2,18 @@ name: CI/CD Security Scan on Juice Shop
 
 on:
   push:
-    branches:
-          - main
+    branches:[master]
+    
   pull_request:
   workflow_dispatch:
 
 jobs:
   security-scan:
     runs-on: ubuntu-latest
-
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
