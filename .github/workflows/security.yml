@@ -7,46 +7,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  juice-shop-security:
-    name: Security Scan
+  security-scan:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Juice Shop Code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+    - name: Start Juice Shop in Docker
+      run: docker run -d -p 3000:3000 --name juice-shop bkimminich/juice-shop
 
-    - name: Install Dependencies
-      run: npm install
+    - name: Wait for Juice Shop to Start
+      run: sleep 15
 
-    - name: Start Juice Shop App in Background
-      run: |
-        npm start &           # Run app in background
-        sleep 15              # Wait for it to fully start
-
-    - name: Set up Python (for Semgrep)
+    - name: Install Python (for Semgrep)
       uses: actions/setup-python@v4
       with:
-        python-version: 3.x
+        python-version: '3.x'
 
     - name: Install Semgrep
       run: pip install semgrep
 
     - name: Run Semgrep Scan (SAST)
       run: |
-       semgrep scan --config auto || true
-      
+        semgrep scan --config auto || true
+
     - name: Run OWASP ZAP Baseline Scan (DAST)
       uses: zaproxy/action-baseline@v0.10.0
       with:
         target: 'http://localhost:3000'
         fail_action: true
-        allow_issue_writing: false
         token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Run Docker Compose for ZAP and Juice Shop
-      run: docker-compose up --abort-on-container-exit
-
