@@ -51,6 +51,7 @@ jobs:
       with:
         target: 'http://localhost:3000'
         fail_action: false
+        allow_issue_writing: false
         cmd_options: '-r report_html.html'
         token: ${{ secrets.GITHUB_TOKEN }}
 
