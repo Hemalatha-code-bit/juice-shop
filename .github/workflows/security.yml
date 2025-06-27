@@ -55,8 +55,8 @@ jobs:
         cmd_options: '-r report_html.html'
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload ZAP Report
+    - name: Upload ZAP HTML Report
       uses: actions/upload-artifact@v4
       with:
-        name: zap-html-report
-        path: report_html.html
+      name: zap-scan-report
+      path: report_html.html
