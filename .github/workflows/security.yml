@@ -47,3 +47,6 @@ jobs:
         fail_action: true
         allow_issue_writing: false
         token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run Docker Compose for ZAP and Juice Shop
+      run: docker-compose up --abort-on-container-exit
+
