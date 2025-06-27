@@ -1,0 +1,46 @@
+name: CI/CD Security Scan on Juice Shop
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  juice-shop-security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Juice Shop Code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run Juice Shop in Background
+      run: |
+        npm start &     # Starts app on port 3000
+        sleep 15        # Wait for app to start
+
+    # SEMGREP - Static Code Analysis
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+
+    - name: Install Semgrep
+      run: pip install semgrep
+
+    - name: Run Semgrep Scan (SAST)
+      run: semgrep scan --config auto --error
+
+    # ZAP - Dynamic Application Security Test
+    - name: Run OWASP ZAP Baseline Scan (DAST)
+      uses: zaproxy/action-baseline@v0.10.0
+      with:
+        target: 'http://localhost:3000'
+        fail_action: true
