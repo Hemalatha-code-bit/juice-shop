@@ -1,0 +1,19 @@
+version: '3'
+services:
+  juice-shop:
+    image: bkimminich/juice-shop
+    ports:
+      - "3000:3000"
+    networks:
+      - zapnet
+
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    networks:
+      - zapnet
+    command: >
+      zap-baseline.py -t http://juice-shop:3000 -J report_json.json -w report_md.md -r report_html.html
+
+networks:
+  zapnet:
+    driver: bridge
